@@ -6,7 +6,7 @@ A web-based authoring tool and reader for branching CYOA stories. Built for *The
 
 - **Due:** Midnight
 - **GitHub Repository URL:** https://github.com/pisan382/choose-your-own-adventure
-- **Deployed Website URL:** TODO - add your public deployment URL before final submission
+- **Deployed Website URL:** https://velvety-marshmallow-4f0501.netlify.app/page-2.html
 - **Team Members (all must contribute):** Timothy So, Vincent Huang, Shreyas Sundar Ganesh
 
 ## Class Workflow Checklist
@@ -207,6 +207,16 @@ python -m http.server 8080
 ```
 
 Then open `http://localhost:8080`. No Python backend is required.
+
+### Option C: Netlify
+
+Netlify can host the exported static reader site in `output/dist/`.
+
+1. Connect the repository to Netlify.
+2. Keep the default build command from `netlify.toml`.
+3. Publish the generated `output/dist/` directory.
+
+This deploy path is static reader mode only. The interactive graph editor and API routes still require the FastAPI backend plus a reverse proxy, as described above.
 
 ## Regenerating Canonical Assets
 

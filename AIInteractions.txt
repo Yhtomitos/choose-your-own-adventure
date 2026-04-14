@@ -1261,3 +1261,290 @@ The story The Cave of Time begins on story page 2 (the first page of actual narr
 So reader.html defaults to page 2 because that's where the adventure starts.
 
 All 45 tests pass ✅. Try clicking a choice link in the reader now — it should properly advance to page 3, 4, 5, etc.
+
+
+
+I’m checking the project shape first so I can determine the correct Netlify build/output settings and whether anything in the app needs to change before deployment.
+
+Searched for files matching `**/package.json`, no matches
+
+Searched for files matching `**/pyproject.toml`, no matches
+
+Searched for files matching `**/requirements.txt`, no matches
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/README.md#1-1), lines 1 to 260
+
+I’ve confirmed this is a Python/FastAPI app with a static export path, so I’m checking whether the site can be deployed as static hosting on Netlify or whether the backend makes that impossible without changes.
+
+Searched for files matching `**/netlify.toml`, no matches
+
+Searched for files matching `**/web/static/**`, 10 matches
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/web/main.py#1-1), lines 1 to 260
+
+The app does have a static frontend, but I need to verify whether the reader and graph pages depend on the Python API at runtime. If they do, a straight Netlify static deploy won’t be enough and I’ll need to add Netlify Functions or another static-export path.
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/web/static/reader.js)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/web/static/index.html)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/tests/test_deployment.py)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/web/static/graph.js#1-1), lines 1 to 260
+
+The frontend JS still calls the FastAPI endpoints, so I’m checking the static export pipeline next. If exported pages are already self-contained, I can wire Netlify to publish that output; otherwise I’ll need to remove the runtime API dependency.
+
+Searched for regex `api/export|output/dist|dist/` (`choose-your-own-adventure` · `web/main.py`), 2 results
+
+Searched for text `/api/` (`choose-your-own-adventure` · `output/dist/**`), no results
+
+Searched for text `netlify` (`choose-your-own-adventure`), 1 result
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/web/main.py#360-360), lines 360 to 598
+
+I found a static export route that produces a self-contained reader site. Next I’m checking the generator scripts so I can decide whether Netlify can build the export directly or whether I need a new, dependency-light build wrapper.
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/scripts/render_story_graph_svg.py#1-1), lines 1 to 260
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/scripts/write_all_stories.py#1-1), lines 1 to 260
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/scripts/build_story_graph.py)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/AI-Instructions.md)
+
+I’ve confirmed the backend is the blocker: Netlify can host the exported reader, but not the FastAPI editor/API without extra infrastructure. I’m now looking for any existing deployment notes or tests so I can match the repo’s intended Netlify path instead of guessing.
+
+Searched for regex `Netlify|netlify|deploy` (`choose-your-own-adventure` · `tests/**`), no results
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/Codebase.md)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/ToDo.md#130-130), lines 130 to 240
+
+I’m at the point where the only realistic Netlify path is a static build of the exported reader. I’m checking the dependency footprint now so I can add the smallest build config that will actually run on Netlify’s Python build image.
+
+Searched for regex `fastapi|uvicorn|pydantic|playwright|httpx|pytest-playwright` (`choose-your-own-adventure`), 115 results
+
+Searched for files matching `**/requirements*.txt`, no matches
+
+Searched for files matching `**/pyproject.toml`, no matches
+
+I’m setting up the Python environment for this workspace now so I can validate the export path after I add the Netlify build config.
+
+Configuring a Python Environment
+Completed with input: {
+  "resourcePath": "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure"
+}
+
+
+Completed with input: {
+  "resourcePath": "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure"
+}
+
+I’ve got the deployment approach: add a Netlify build config that generates the self-contained static export into `output/dist`, then publish that directory. I’m making the smallest set of repo changes to support that and documenting the Netlify-specific limitation that only the reader/export is static.
+
+Apply Patch
+
+I’m applying the Netlify build files and a README note now; this keeps the deployment path explicit without changing the app’s runtime architecture.
+
+Generating patch (45 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/README.md), [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/netlify.toml), [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/requirements-netlify.txt), [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/scripts/netlify_build.py)
+
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+I’ve added the Netlify build path. I’m running the static export once locally to make sure the build script actually produces `output/dist/` with the current workspace contents.
+
+Ran terminal command:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/netlify_build.py
+Completed with input:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/netlify_build.py
+
+The export script failed because the repo root wasn’t on `sys.path` in this execution context. I’m patching the build script to make the import robust regardless of where Netlify launches it from.
+
+Generating patch (14 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/scripts/netlify_build.py)
+
+
+```
+
+```
+
+
+Ran terminal command:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/netlify_build.py
+Completed with input:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/netlify_build.py
+
+The build script now reaches the app import, which means the path fix worked. This environment is missing `fastapi`, so I’m installing the minimal runtime dependencies needed for the export path and then I’ll rerun the build.
+
+Installing packages fastapi, python-multipart in .venv (3.13.5)
+Completed with input: {
+  "resourcePath": "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure",
+  "packageList": [
+    "fastapi",
+    "python-multipart"
+  ]
+}
+
+Ran terminal command:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/netlify_build.py
+
+The build now completes and writes the static site. I’m doing one quick directory check to make sure the exported publish folder is actually populated before I close this out.
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/output/dist)
+
+The export is good locally. I’m checking whether this workspace already has Netlify credentials available; if it does, I can try a direct production deploy, and if not I’ll stop at the repo-ready setup instead of pretending it was published.
+
+Ran terminal command:  printenv | grep '^NETLIFY' || true
+
+There aren’t any Netlify credentials in the environment, so I’m making one last check in the browser to see whether Netlify Drop is available without sign-in. If it isn’t, I’ll report the repo is deployment-ready but not published from this session.
+
+Opened [Browser](vscode-browser:/6964e52e-6f46-4464-8100-2247107c9c7c?vscodeLinkType=browser)
+
+Read [Browser](vscode-browser:/6964e52e-6f46-4464-8100-2247107c9c7c?vscodeLinkType=browser)
+
+Netlify Drop is available without sign-in, so I’m packaging the generated static site as a flat zip archive and uploading that instead of trying to use the backend-backed repo directly.
+
+Ran terminal command:  cd "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/output/dist" && /usr/bin/zip -r ../netlify-dist.zip .
+
+I’ve packaged the deployable static site. I’m uploading the zip to Netlify Drop now, which should produce the public URL if Netlify accepts the archive.
+
+Clicked Choose File button in [Browser](vscode-browser:/6964e52e-6f46-4464-8100-2247107c9c7c?vscodeLinkType=browser)
+
+The Netlify page is ready. I’m using the file input directly now so I can upload the generated zip without fighting the drag-and-drop overlay.
+
+Ran Playwright code
+Completed with input: await page.setInputFiles('input[type="file"]', '/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/output/netlify-dist.zip');
+return 'uploaded';
+
+Read [Browser](vscode-browser:/6964e52e-6f46-4464-8100-2247107c9c7c?vscodeLinkType=browser)
+
+The upload is in progress. I’m waiting for Netlify to finish processing and hand back the temporary public URL.
+
+Ran Playwright code
+Completed with input: await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+return page.url();
+
+The Netlify Drop deployment succeeded. I’m opening the public URL once to verify the landing page resolves correctly from the deployed site, including the password gate Netlify adds for drop deployments.
+
+Opened [Browser](vscode-browser:/7cf7c985-0e8b-41bd-8549-c674fb14f1a1?vscodeLinkType=browser)
+
+Typed text in password input in [Browser](vscode-browser:/7cf7c985-0e8b-41bd-8549-c674fb14f1a1?vscodeLinkType=browser)
+
+Clicked Submit button in [Browser](vscode-browser:/7cf7c985-0e8b-41bd-8549-c674fb14f1a1?vscodeLinkType=browser)
+
+The live Netlify Drop deployment is up and serving the exported reader. I’m grabbing the final diff summary so I can report exactly what changed and what remains external to the repo.
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+I’ve got the deployment done. I’m cleaning up the temporary zip I created for Netlify Drop so the repo only keeps the reusable deployment configuration and not the upload artifact.
+
+Generating patch (3 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/output/netlify-dist.zip)
+
+Read [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/output)
+
+The patch delete didn’t take on the zip, so I’m removing that one temporary artifact directly. It’s just the upload package, not a source file.
+
+Ran terminal command:  rm "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/output/netlify-dist.zip"
+
+The temporary zip is gone. I’m doing one final diff check so the remaining changes are just the Netlify setup and any regenerated project artifacts.
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+I found an accidental generated-file regression in the story graph. I’m regenerating the canonical Mermaid graph from the OCR pages now so the repo stays consistent after the deployment work.
+
+Ran terminal command:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/build_story_graph.py --pages-dir output/cot-pages-ocr-v2 --output output/cot-story-graph.mmd
+Completed with input:  "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/build_story_graph.py --pages-dir output/cot-pages-ocr-v2 --output output/cot-story-graph.mmd
+
+The terminal was sitting in the exported site directory, so I’m rerunning the regeneration from the repository root with absolute paths.
+
+Ran terminal command:  cd "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure" && "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/build_story_graph.py --pages-dir output/cot-pages-ocr-v2 --output output/cot-story-graph.mmd
+
+The graph file is back in shape. I’m regenerating the SVG from that restored graph so the checked-in visualization matches the canonical Mermaid source again.
+
+Ran terminal command:  cd "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure" && "/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/.venv/bin/python" scripts/render_story_graph_svg.py --graph output/cot-story-graph.mmd --output output/cot-story-graph.svg
+
+I’ve restored the graph outputs. I’m fixing one stray editor setting change and then I’ll re-check the remaining diff so only the deployment-related files are left.
+
+Generating patch (9 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/.vscode/settings.json)
+
+
+```
+
+```
+
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+Compacted conversationI’m cleaning up the last accidental diffs from the deployment work, starting with the editor settings normalization and the generated metadata file that changed as part of the export. After that I’ll recheck the workspace state so only intentional deployment files remain.
+
+Generating patch (8 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/.vscode/settings.json)
+
+
+```
+
+```
+
+
+Ran terminal command:  python3 - <<'PY'
+import json
+from pathlib import Path
+path = Path('/Users/shreyassundarganesh/Documents/382 AI/choose-your-own-adventure/output/pages-meta.json')
+data = json.loads(path.read_text())
+for key, value in list(data.items()):
+    if isinstance(value, dict):
+        value.pop('x', None)
+        value.pop('y', None)
+        if key == '9999':
+            del data[key]
+path.write_text(json.dumps(data, indent=2, ensure_ascii=True) + '\n')
+PY
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+The generated graph and export config are now in place. I’m checking whether the metadata file is fully back to its canonical form or whether the export added more than just layout coordinates.
+
+Ran terminal command:  git diff --stat -- output/pages-meta.json && git diff -- output/pages-meta.json | sed -n '1,120p'
+
+Ran terminal command:  python3 - <<'PY'
+import json, subprocess
+text = subprocess.check_output(['git', 'show', 'HEAD:output/pages-meta.json'], text=True)
+data = json.loads(text)
+print(data['3'])
+PY
+
+I found the remaining mismatch: the checked-in metadata keeps coordinates for page 3, so I’m restoring those two fields and then I should be back to a clean diff set for the generated files.
+
+Generating patch (13 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/output/pages-meta.json)
+
+
+```
+
+```
+
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+The only accidental diff left is the workspace settings indentation. I’m normalizing that back to the repository’s original spacing so the tree is clean except for the intentional deployment files.
+
+Generating patch (8 lines) in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure/.vscode/settings.json)
+
+
+```
+
+```
+
+
+Read changed files in [](file:///Users/shreyassundarganesh/Documents/382%20AI/choose-your-own-adventure)
+
+Netlify deployment support is in place, and the exported reader is live at https://velvety-marshmallow-4f0501.netlify.app/page-2.html. The build/publish setup is in netlify.toml, requirements-netlify.txt, and netlify_build.py, with the deployment notes added in README.md.
+
+I also cleaned up the incidental generated diffs from the export work so the repo is back to the intended state. This Netlify path hosts the static reader only; the graph editor and API still need the FastAPI backend.
+
+Made changes.

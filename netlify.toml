@@ -1,0 +1,3 @@
+[build]
+command = "python3 -m pip install -r requirements-netlify.txt && python3 scripts/netlify_build.py"
+publish = "output/dist"
