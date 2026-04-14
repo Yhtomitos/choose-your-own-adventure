@@ -164,6 +164,17 @@ python -m pytest tests/ -v
 
 ## Deployment
 
+### Option 0: Backend on Render (for full Netlify functionality)
+
+This repository includes `render.yaml` and `requirements.txt` for backend deployment.
+
+1. Push your latest branch to GitHub.
+2. In Render, create a new Blueprint and select this repository.
+3. Apply the blueprint from `render.yaml`.
+4. Set `CYOA_CORS_ORIGINS` in Render to your Netlify origin (for example `https://velvety-marshmallow-4f0501.netlify.app`).
+5. After deploy, verify `https://<your-render-service>.onrender.com/api/graph` returns JSON.
+6. In Netlify, set `CYOA_API_BASE` to the Render backend URL and redeploy.
+
 ### Option A: Full Stack (Authoring + Reader)
 
 Run uvicorn behind a reverse proxy (Caddy or nginx).

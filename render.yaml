@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: cyoa-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn web.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/graph
+    envVars:
+      - key: CYOA_CORS_ORIGINS
+        sync: false
