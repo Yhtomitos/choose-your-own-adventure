@@ -40,6 +40,7 @@ A web-based authoring tool and reader for branching CYOA stories. Built for *The
 
 ### 1. Install Dependencies
 
+**macOS / Linux**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -48,9 +49,28 @@ pip install pytest httpx playwright pytest-playwright
 python3 -m playwright install chromium
 ```
 
+**Windows (PowerShell)**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install fastapi uvicorn python-multipart
+pip install pytest httpx playwright pytest-playwright
+python -m playwright install chromium
+```
+
+> **Note:** On Windows you may need to run PowerShell as Administrator or run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` first to allow script execution.
+
 ### 2. Run the Development Server
 
+**macOS / Linux**
 ```bash
+source .venv/bin/activate
+uvicorn web.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+**Windows (PowerShell)**
+```powershell
+.venv\Scripts\Activate.ps1
 uvicorn web.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
@@ -97,11 +117,19 @@ Click **Export** in the graph toolbar (or `POST /api/export`). This:
 
 All tests run in isolated temp directories and do not mutate your real `output/` folder.
 
+**macOS / Linux**
 ```bash
+source .venv/bin/activate
 python3 -m pytest tests/ -v
 ```
 
-**Current status:** 37 tests passing (backend unit, frontend Playwright, integration, deployment).
+**Windows (PowerShell)**
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pytest tests/ -v
+```
+
+**Current status:** 45 tests passing (backend unit, frontend Playwright, integration, deployment, UI navigation).
 
 ## Deployment
 
@@ -109,13 +137,23 @@ python3 -m pytest tests/ -v
 
 Run uvicorn behind a reverse proxy (Caddy or nginx).
 
-Example with the provided sample config:
-
+**macOS / Linux**
 ```bash
 # Terminal 1: start the app
+source .venv/bin/activate
 uvicorn web.main:app --host 127.0.0.1 --port 8000
 
 # Terminal 2: start Caddy
+caddy run --config Caddyfile.sample
+```
+
+**Windows (PowerShell)**
+```powershell
+# Terminal 1: start the app
+.venv\Scripts\Activate.ps1
+uvicorn web.main:app --host 127.0.0.1 --port 8000
+
+# Terminal 2: start Caddy (if installed)
 caddy run --config Caddyfile.sample
 ```
 
@@ -125,9 +163,16 @@ See `Caddyfile.sample` for a working reverse-proxy setup.
 
 After running export:
 
+**macOS / Linux**
 ```bash
 cd output/dist
 python3 -m http.server 8080
+```
+
+**Windows (PowerShell)**
+```powershell
+cd output\dist
+python -m http.server 8080
 ```
 
 Then open `http://localhost:8080`. No Python backend is required.
@@ -136,6 +181,7 @@ Then open `http://localhost:8080`. No Python backend is required.
 
 If you modify the raw page text files, you can regenerate the downstream artifacts:
 
+**macOS / Linux**
 ```bash
 # Rebuild MMD from text (optional; MMD is normally edited via the graph UI)
 python3 scripts/build_story_graph.py \
@@ -154,6 +200,27 @@ python3 scripts/write_all_stories.py \
   --start-page 2 \
   --max-decisions 20 \
   --output-dir output/cot-stories
+```
+
+**Windows (PowerShell)**
+```powershell
+# Rebuild MMD from text (optional; MMD is normally edited via the graph UI)
+python scripts\build_story_graph.py `
+  --pages-dir output\cot-pages-ocr-v2 `
+  --output output\cot-story-graph.mmd
+
+# Render SVG
+python scripts\render_story_graph_svg.py `
+  --graph output\cot-story-graph.mmd `
+  --output output\cot-story-graph.svg
+
+# Write all bounded stories
+python scripts\write_all_stories.py `
+  --graph output\cot-story-graph.mmd `
+  --pages-dir output\cot-pages-ocr-v2 `
+  --start-page 2 `
+  --max-decisions 20 `
+  --output-dir output\cot-stories
 ```
 
 ## Notes

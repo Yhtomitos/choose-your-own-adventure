@@ -1,4 +1,3 @@
-
 Read the Fork-Instructions.md and Codebase.md. Then write a new Brainstorm.md for the following task. Do not write code yet. Read the folder cot-pages-ocr-v2. We will be creating a web interface for this CYOA adventure story. What are some ideas on how to make this work? My idea is to be able to parse through the pages, look at the filenames to determine the page number and have the part of the text that says "Go to page xx" as a link there. And there should also be a graph view with connections to be able to be manipulated so you can import new pages and have it sync automatically. Anyway please brainstorm.
 
 K
@@ -983,3 +982,282 @@ Bonus recommendation: Add a "Jump to page" search box in the graph toolbar to qu
 The ToDo.md now includes the exact HTML/CSS/JS snippets and a table of which files need to change. Let me know if you'd like me to implement these fixes next!
 
 Please write tests for these and then implement.
+
+K
+Kimi
+Thinking
+
+WriteFile
+test_ui_navigation.py
+Thinking
+
+StrReplaceFile
+reader.html
+Thinking
+
+StrReplaceFile
+reader.css
+Thinking
+
+StrReplaceFile
+graph.html
+Thinking
+
+StrReplaceFile
+graph.html
+Thinking
+
+StrReplaceFile
+graph.css
+Thinking
+
+StrReplaceFile
+graph.css
+Thinking
+
+StrReplaceFile
+graph.css
+Thinking
+
+StrReplaceFile
+graph.css
+Thinking
+
+StrReplaceFile
+graph.css
+Thinking
+
+StrReplaceFile
+graph.js
+Thinking
+
+StrReplaceFile
+graph.js
+Thinking
+
+StrReplaceFile
+graph.js
+Thinking
+
+StrReplaceFile
+graph.js
+Thinking
+
+StrReplaceFile
+paths.html
+Thinking
+
+StrReplaceFile
+paths.css
+Thinking
+
+Shell
+cd /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure && source .venv/bin/activate && python3 -m pytest tests/test_ui_navigation.py -v
+Thinking
+
+Shell
+cd /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure && source .venv/bin/activate && python3 -m pytest tests/ -v
+Thinking
+Done! All 44 tests pass ✅.
+
+Here's what was implemented:
+
+Tests Added
+tests/test_ui_navigation.py — 7 Playwright tests covering:
+Top nav visible on reader, graph, and paths pages
+Nav links successfully switch between modes
+Graph auto-selects node from #page=X hash
+Graph hint appears when no node is selected and hides on selection
+"Jump to page" toolbar input finds and selects nodes
+UI Fixes Implemented
+1. Persistent Top Navigation
+
+Added .top-nav to reader.html, graph.html, and paths.html with links to all three views.
+Styled consistently across reader.css, graph.css, and paths.css.
+2. Graph Auto-Select from Hash
+
+graph.js now parses location.hash (e.g. #page=3) on load, automatically opens the side panel for that node, and centers the camera on it.
+This fixes the "Edit in Graph" link from Reader Mode.
+3. Onboarding Hint
+
+Added #graph-hint floating box in graph.html:
+"Tip: Click a node to edit text & edges. Double-click to open in Reader. Shift-click another node to connect them."
+It hides when a node is selected and reappears when the panel is closed.
+4. Clear Selection Link
+
+Added a "Clear Selection" link at the bottom of the graph side panel that closes the panel and brings the hint back.
+5. Jump to Page Toolbar
+
+Added a #jump-to-page number input in the graph toolbar.
+Pressing Enter centers the camera on that page and opens the side panel (creating a placeholder node if it doesn't exist yet).
+Files Modified
+File	Change
+web/static/reader.html	Added .top-nav
+web/static/reader.css	Styled .top-nav
+web/static/graph.html	Added .top-nav, #graph-hint, jump-to-page input, clear-selection link
+web/static/graph.css	Styled nav, hint, toolbar input; adjusted canvas position for nav bar
+web/static/graph.js	Hash parsing, hint toggle, jump-to-page logic, clear-selection handler
+web/static/paths.html	Added .top-nav, removed old inline nav
+web/static/paths.css	Styled .top-nav
+tests/test_ui_navigation.py	New test file (7 tests)
+Going to next page returns error.
+
+Media
+K
+Kimi
+Thinking
+
+Shell
+ls -la /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure/web/static/index.html 2>/dev/null || echo "No index.html in static dir"
+IN
+ls -la /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure/web/static/index.html 2>/dev/null || echo "No index.html in static dir"
+OUT
+No index.html in static dir
+Thinking
+
+WriteFile
+index.html
+Thinking
+
+WriteFile
+test_ui_navigation.py
+IN
+tests/test_ui_navigation.py
+(overwrite)
+OUT
+test_ui_navigation.py
+def _set_viewport(page: Page):
+    page.set_viewport_size({"width": 1280, "height": 800})
+# ---------------------------------------------------------------------------
+def _set_viewport(page: Page):
+    page.set_viewport_size({"width": 1280, "height": 800})
+# ---------------------------------------------------------------------------
+# Root redirect
+# ---------------------------------------------------------------------------
+def test_root_redirects_to_reader(page: Page, live_server_url):
+    _set_viewport(page)
+    page.goto(f"{live_server_url}/")
+    page.wait_for_timeout(500)
+    assert "reader.html" in page.url
+# ---------------------------------------------------------------------------
+Thinking
+
+Shell
+cd /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure && source .venv/bin/activate && python3 -m pytest tests/ -v
+IN
+cd /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure && source .venv/bin/activate && python3 -m pytest tests/ -v
+OUT
+============================= test session starts ==============================
+platform linux -- Python 3.9.25, pytest-8.4.2, pluggy-1.6.0 -- /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure
+plugins: anyio-4.12.1, base-url-2.1.0, playwright-0.7.1
+collecting ... collected 45 items
+
+tests/test_deployment.py::test_dev_server_starts_and_serves_static PASSED [  2%]
+tests/test_deployment.py::test_static_dist_no_server_needed PASSED       [  4%]
+tests/test_graph_frontend.py::test_graph_loads_all_nodes[chromium] PASSED [  6%]
+...
+Expand +44
+Thinking
+Fixed! The root cause was that web/static/ had no index.html, so visiting http://localhost:8000/ returned a 404 JSON response instead of loading the reader.
+
+What I Did
+Created web/static/index.html — a simple redirect page that sends the user straight to reader.html:
+
+<meta http-equiv="refresh" content="0; url=reader.html">
+Added a regression test test_root_redirects_to_reader in tests/test_ui_navigation.py to ensure the root URL always loads the reader app.
+
+Ran the full suite — 45/45 tests pass ✅.
+
+Now when you visit http://localhost:8000/ or click a link that points to /, you'll land in the Reader instead of seeing the "Not Found" JSON error.
+
+INFO: Will watch for changes in these directories: ['/home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure'] INFO: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit) INFO: Started reloader process [72752] using StatReload INFO: Started server process [72754] INFO: Waiting for application startup. INFO: Application startup complete. INFO: 127.0.0.1:59838 - "GET / HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /reader.html HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /reader.css HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /reader.js HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /favicon.ico HTTP/1.1" 404 Not Found INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK INFO: 127.0.0.1:59838 - "GET /api/pages/2 HTTP/1.1" 200 OK INFO: 127.0.0.1:59858 - "GET /api/graph HTTP/1.1" 200 OK
+
+Ok, it isnt progressing. I start on page 2 (why do i start on page 2 by the way?) and i go to page 3 and it brings me to page 2.
+
+K
+Kimi
+Thinking
+
+StrReplaceFile
+reader.js
+IN
+web/static/reader.js
+OUT
+reader.js
+        const target = parseInt(m[1], 10);
+        if (outgoingSet.has(target)) {
+          choiceLinks.push(target);
+          resultLines.push(`<a class="choice-link" href="/#${target}" data-target="${target}">${line.trim()}</a>`);
+          replaced = true;
+          break;
+        }
+        const target = parseInt(m[1], 10);
+        if (outgoingSet.has(target)) {
+          choiceLinks.push(target);
+          resultLines.push(`<a class="choice-link" href="#${target}" data-target="${target}">${line.trim()}</a>`);
+          replaced = true;
+          break;
+        }
+reader.js
+    extraChoices.forEach(target => {
+      const a = document.createElement('a');
+      a.className = 'choice-link';
+      a.href = `/#${target}`;
+      a.textContent = `Go to page ${target}`;
+      choicesDiv.appendChild(a);
+    });
+    extraChoices.forEach(target => {
+      const a = document.createElement('a');
+      a.className = 'choice-link';
+      a.href = `#${target}`;
+      a.textContent = `Go to page ${target}`;
+      choicesDiv.appendChild(a);
+    });
+reader.js
+      if (outgoing.length === 0 && choiceLinks.length === 0) {
+        const nextPage = page + 1;
+        const fbLink = sequentialFallback.querySelector('a');
+        fbLink.href = `/#${nextPage}`;
+        fbLink.textContent = `Continue to page ${nextPage}`;
+        sequentialFallback.classList.remove('hidden');
+      } else {
+      if (outgoing.length === 0 && choiceLinks.length === 0) {
+        const nextPage = page + 1;
+        const fbLink = sequentialFallback.querySelector('a');
+        fbLink.href = `#${nextPage}`;
+        fbLink.textContent = `Continue to page ${nextPage}`;
+        sequentialFallback.classList.remove('hidden');
+      } else {
+Thinking
+
+Shell
+cd /home/cssuwbstudent/vincent/CYOA/choose-your-own-adventure && source .venv/bin/activate && python3 -m pytest tests/ -v
+Thinking
+Fixed! The problem was in reader.js: the choice links were using absolute paths like href="/#3" instead of relative hashes like href="#3".
+
+What was happening
+When you're on http://localhost:8000/reader.html#2 and click a link to /#3, the browser navigates away from reader.html to the root path / (with hash #3). The server serves index.html, which redirects to reader.html. Depending on the browser, that redirect may drop the hash, so you end up at plain reader.html with no hash — which defaults back to page 2.
+
+The fix
+I changed all in-story choice links to use relative hashes (#3, #4, etc.) so they stay on reader.html and only change the hash:
+
+// Before (wrong)
+href="/#3"
+
+// After (correct)
+href="#3"
+This applies to:
+
+Regex-detected choice links in the text
+Extra MMD edge links
+Sequential fallback "Continue to next page" links
+Why you start on page 2
+The story The Cave of Time begins on story page 2 (the first page of actual narrative). Page 1 of the physical book is the title/copyright page. This is documented in Codebase.md:
+
+"The story begins on story page 2 with: 'You've hiked through Snake Canyon once before...'"
+
+So reader.html defaults to page 2 because that's where the adventure starts.
+
+All 45 tests pass ✅. Try clicking a choice link in the reader now — it should properly advance to page 3, 4, 5, etc.
