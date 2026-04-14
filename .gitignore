@@ -41,3 +41,6 @@ htmlcov/
 # Large session logs (optional — keep if you want history, but they are large)
 # AI-session-log-*.json
 __pycache__/
+
+# Local Netlify folder
+.netlify
