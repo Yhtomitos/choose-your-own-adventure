@@ -525,10 +525,16 @@ def api_export():
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page {page_num}</title>
   <link rel="stylesheet" href="reader.css">
 </head>
 <body>
+    <nav class="top-nav">
+        <a href="page-2.html">📖 Reader</a>
+        <a href="graph.html">🕸️ Graph</a>
+        <a href="paths.html">🛤️ Paths</a>
+    </nav>
   <header><h1>The Cave of Time</h1><div class="controls"><a class="choice-link" href="page-2.html">Restart</a><span>Page {page_num}</span></div></header>
   <main>
     <article id="page-content" style="white-space: pre-wrap;">{content_joined}</article>
