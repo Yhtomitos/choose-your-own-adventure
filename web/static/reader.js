@@ -1,5 +1,5 @@
 (function () {
-  const API_BASE = '';
+  const API_BASE = (window.CYOA_API_BASE || '').replace(/\/+$/, '');
   const pageContent = document.getElementById('page-content');
   const choicesDiv = document.getElementById('choices');
   const terminalOverlay = document.getElementById('terminal-overlay');

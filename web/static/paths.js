@@ -1,6 +1,7 @@
 (async function () {
+  const API_BASE = (window.CYOA_API_BASE || '').replace(/\/+$/, '');
   try {
-    const res = await fetch('/api/paths');
+    const res = await fetch(`${API_BASE}/api/paths`);
     if (!res.ok) throw new Error(res.statusText);
     const data = await res.json();
 

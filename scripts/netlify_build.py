@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -15,6 +16,13 @@ from web.main import api_export
 
 def main() -> None:
     result = api_export()
+    dist_dir = Path(result["dist"])
+    api_base = os.environ.get("CYOA_API_BASE", "").rstrip("/")
+    config_js = (
+        "// Generated at build time for Netlify static deployment.\n"
+        f"window.CYOA_API_BASE = {api_base!r};\n"
+    )
+    (dist_dir / "config.js").write_text(config_js, encoding="utf-8")
     print(result["dist"])
 
 

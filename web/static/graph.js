@@ -3,7 +3,7 @@
   let graphData = null;
   let selectedPage = null;
 
-  const API_BASE = '';
+  const API_BASE = (window.CYOA_API_BASE || '').replace(/\/+$/, '');
 
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, options);

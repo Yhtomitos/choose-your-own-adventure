@@ -215,8 +215,10 @@ Netlify can host the exported static reader site in `output/dist/`.
 1. Connect the repository to Netlify.
 2. Keep the default build command from `netlify.toml`.
 3. Publish the generated `output/dist/` directory.
+4. For full functionality (Graph/Paths/Editor), deploy the FastAPI backend separately (Render/Fly.io/Railway/VM) and set Netlify env var `CYOA_API_BASE` to that backend URL (for example `https://your-backend.example.com`).
+5. On the backend service, set `CYOA_CORS_ORIGINS` to your Netlify site origin (for example `https://velvety-marshmallow-4f0501.netlify.app`).
 
-This deploy path is static reader mode only. The interactive graph editor and API routes still require the FastAPI backend plus a reverse proxy, as described above.
+Without `CYOA_API_BASE`, Netlify runs in reader-only static mode. Graph and editor APIs require a live backend.
 
 ## Regenerating Canonical Assets
 
